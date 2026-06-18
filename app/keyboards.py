@@ -5,96 +5,97 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
 )
 
-
-BTN_SCAN = "📸 Скан"
-BTN_TOOLS = "🧰 Инструменты"
-BTN_HELP = "❓ Помощь"
-BTN_BACK = "⬅️ Назад"
-
-BTN_SCAN_DOCUMENT = "📄 Лист / документ"
-BTN_ID_DOCUMENT = "🪪 Паспорт / ID"
-BTN_PHOTO_TO_PDF = "🖼 Фото в PDF"
-
-BTN_COMPRESS_PDF = "🗜 Сжать PDF"
-BTN_SPLIT_PDF = "✂️ Разделить PDF"
-BTN_EXTRACT_TEXT = "📝 Достать текст"
-BTN_PDF_TO_WORD = "📄 PDF → Word"
-BTN_WORD_TO_PDF = "📝 Word → PDF"
-BTN_AI_SUMMARY = "🤖 AI-summary"
+from app.i18n import LANGUAGE_LABELS, button, t
 
 
-def main_menu_keyboard() -> ReplyKeyboardMarkup:
+def language_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [
-                KeyboardButton(text=BTN_SCAN),
-                KeyboardButton(text=BTN_TOOLS),
+                KeyboardButton(text=LANGUAGE_LABELS["uk"]),
+                KeyboardButton(text=LANGUAGE_LABELS["ru"]),
             ],
             [
-                KeyboardButton(text=BTN_HELP),
+                KeyboardButton(text=LANGUAGE_LABELS["en"]),
             ],
         ],
         resize_keyboard=True,
-        input_field_placeholder="Выбери раздел",
+        input_field_placeholder=t("uk", "language_placeholder"),
     )
 
 
-def scan_menu_keyboard() -> ReplyKeyboardMarkup:
+def main_menu_keyboard(lang: str = "uk") -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [
-                KeyboardButton(text=BTN_SCAN_DOCUMENT),
-                KeyboardButton(text=BTN_ID_DOCUMENT),
+                KeyboardButton(text=button(lang, "scan")),
+                KeyboardButton(text=button(lang, "tools")),
             ],
             [
-                KeyboardButton(text=BTN_PHOTO_TO_PDF),
-            ],
-            [
-                KeyboardButton(text=BTN_BACK),
+                KeyboardButton(text=button(lang, "help")),
             ],
         ],
         resize_keyboard=True,
-        input_field_placeholder="Что сканируем?",
+        input_field_placeholder=t(lang, "main_placeholder"),
     )
 
 
-def tools_menu_keyboard() -> ReplyKeyboardMarkup:
+def scan_menu_keyboard(lang: str = "uk") -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [
-                KeyboardButton(text=BTN_COMPRESS_PDF),
-                KeyboardButton(text=BTN_SPLIT_PDF),
+                KeyboardButton(text=button(lang, "scan_document")),
+                KeyboardButton(text=button(lang, "id_document")),
             ],
             [
-                KeyboardButton(text=BTN_EXTRACT_TEXT),
-                KeyboardButton(text=BTN_PDF_TO_WORD),
+                KeyboardButton(text=button(lang, "photo_to_pdf")),
             ],
             [
-                KeyboardButton(text=BTN_WORD_TO_PDF),
-                KeyboardButton(text=BTN_AI_SUMMARY),
-            ],
-            [
-                KeyboardButton(text=BTN_BACK),
+                KeyboardButton(text=button(lang, "back")),
             ],
         ],
         resize_keyboard=True,
-        input_field_placeholder="Что сделать с файлом?",
+        input_field_placeholder=t(lang, "scan_placeholder"),
     )
 
 
-def pdf_actions_keyboard() -> InlineKeyboardMarkup:
+def tools_menu_keyboard(lang: str = "uk") -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text=button(lang, "compress_pdf")),
+                KeyboardButton(text=button(lang, "split_pdf")),
+            ],
+            [
+                KeyboardButton(text=button(lang, "extract_text")),
+                KeyboardButton(text=button(lang, "pdf_to_word")),
+            ],
+            [
+                KeyboardButton(text=button(lang, "word_to_pdf")),
+                KeyboardButton(text=button(lang, "ai_summary")),
+            ],
+            [
+                KeyboardButton(text=button(lang, "back")),
+            ],
+        ],
+        resize_keyboard=True,
+        input_field_placeholder=t(lang, "tools_placeholder"),
+    )
+
+
+def pdf_actions_keyboard(lang: str = "uk") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="Сжать PDF", callback_data="pdf:compress"),
-                InlineKeyboardButton(text="Разделить", callback_data="pdf:split"),
+                InlineKeyboardButton(text=button(lang, "compress_pdf"), callback_data="pdf:compress"),
+                InlineKeyboardButton(text=button(lang, "split_pdf"), callback_data="pdf:split"),
             ],
             [
-                InlineKeyboardButton(text="Достать текст", callback_data="pdf:text"),
-                InlineKeyboardButton(text="PDF → Word", callback_data="pdf:word"),
+                InlineKeyboardButton(text=button(lang, "extract_text"), callback_data="pdf:text"),
+                InlineKeyboardButton(text=button(lang, "pdf_to_word"), callback_data="pdf:word"),
             ],
             [
-                InlineKeyboardButton(text="AI-summary", callback_data="pdf:summary"),
+                InlineKeyboardButton(text=button(lang, "ai_summary"), callback_data="pdf:summary"),
             ],
         ]
     )
