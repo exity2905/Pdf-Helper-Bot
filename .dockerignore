@@ -1,0 +1,14 @@
+.git
+.env
+.venv
+__pycache__
+*.pyc
+runtime
+dist
+build
+*.egg-info
+test_*.jpg
+test_*.pdf
+quality_tests
+no_highlight_tests
+.DS_Store

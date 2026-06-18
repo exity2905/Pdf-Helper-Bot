@@ -34,6 +34,26 @@ pip install -r requirements.txt
 python -m app.main
 ```
 
+## Railway
+
+Для деплоя на Railway добавлены `Dockerfile` и `railway.json`.
+
+Переменные окружения:
+
+```env
+BOT_TOKEN=токен_из_BotFather
+OPENAI_API_KEY=
+MAX_FILE_MB=20
+```
+
+Start command:
+
+```bash
+python -m app.main
+```
+
+`OPENAI_API_KEY` можно оставить пустым, пока AI-summary не подключён.
+
 ## Команды
 
 - `/start` - выбор языка и главное меню.
