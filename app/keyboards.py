@@ -67,6 +67,9 @@ def tools_menu_keyboard(lang: str = "uk") -> ReplyKeyboardMarkup:
                 KeyboardButton(text=button(lang, "split_pdf")),
             ],
             [
+                KeyboardButton(text=button(lang, "merge_pdf")),
+            ],
+            [
                 KeyboardButton(text=button(lang, "extract_text")),
                 KeyboardButton(text=button(lang, "pdf_to_word")),
             ],
@@ -83,12 +86,30 @@ def tools_menu_keyboard(lang: str = "uk") -> ReplyKeyboardMarkup:
     )
 
 
+def merge_menu_keyboard(lang: str = "uk") -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text=button(lang, "merge_now")),
+            ],
+            [
+                KeyboardButton(text=button(lang, "back")),
+            ],
+        ],
+        resize_keyboard=True,
+        input_field_placeholder=t(lang, "tools_placeholder"),
+    )
+
+
 def pdf_actions_keyboard(lang: str = "uk") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(text=button(lang, "compress_pdf"), callback_data="pdf:compress"),
                 InlineKeyboardButton(text=button(lang, "split_pdf"), callback_data="pdf:split"),
+            ],
+            [
+                InlineKeyboardButton(text=button(lang, "merge_pdf"), callback_data="pdf:merge_start"),
             ],
             [
                 InlineKeyboardButton(text=button(lang, "extract_text"), callback_data="pdf:text"),

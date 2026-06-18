@@ -20,6 +20,8 @@ BUTTONS = {
         "photo_to_pdf": "🖼 Фото в PDF",
         "compress_pdf": "🗜 Стиснути PDF",
         "split_pdf": "✂️ Розділити PDF",
+        "merge_pdf": "🔗 Об'єднати PDF",
+        "merge_now": "✅ Об'єднати зараз",
         "extract_text": "📝 Дістати текст",
         "pdf_to_word": "📄 PDF → Word",
         "word_to_pdf": "📝 Word → PDF",
@@ -35,6 +37,8 @@ BUTTONS = {
         "photo_to_pdf": "🖼 Фото в PDF",
         "compress_pdf": "🗜 Сжать PDF",
         "split_pdf": "✂️ Разделить PDF",
+        "merge_pdf": "🔗 Объединить PDF",
+        "merge_now": "✅ Объединить сейчас",
         "extract_text": "📝 Достать текст",
         "pdf_to_word": "📄 PDF → Word",
         "word_to_pdf": "📝 Word → PDF",
@@ -50,6 +54,8 @@ BUTTONS = {
         "photo_to_pdf": "🖼 Photo to PDF",
         "compress_pdf": "🗜 Compress PDF",
         "split_pdf": "✂️ Split PDF",
+        "merge_pdf": "🔗 Merge PDFs",
+        "merge_now": "✅ Merge now",
         "extract_text": "📝 Extract text",
         "pdf_to_word": "📄 PDF → Word",
         "word_to_pdf": "📝 Word → PDF",
@@ -129,6 +135,22 @@ TEXTS = {
         "word_to_pdf_done": "✅ Готово. Word конвертовано в PDF.",
         "pdf_compressed": "✅ Готово. PDF стиснуто.",
         "pdf_split": "✅ Готово. Розділив PDF на сторінок: {count}.",
+        "merge_start": (
+            "🔗 <b>Об'єднати PDF</b>\n\n"
+            "Надішліть PDF-файли по черзі.\n"
+            "Коли всі файли додані, натисніть ✅ Об'єднати зараз."
+        ),
+        "merge_started_with_current": (
+            "✅ Додав поточний PDF як файл #1.\n"
+            "Надішліть ще PDF або натисніть ✅ Об'єднати зараз."
+        ),
+        "merge_added": (
+            "✅ Додав PDF #{count}: {filename}\n\n"
+            "Надішліть ще один PDF або натисніть ✅ Об'єднати зараз."
+        ),
+        "merge_need_two": "Для об'єднання потрібно мінімум 2 PDF-файли.",
+        "merge_done": "✅ Готово. Об'єднав PDF-файлів: {count}.",
+        "merge_failed": "Не вдалося об'єднати PDF.\nПричина: {reason}",
         "first_pages_sent": "Перші 10 сторінок надіслав. Решта лежить на сервері.",
         "text_not_found": "Текст не знайдено. Можливо, це скан. Тут потрібен OCR.",
         "text_long": "Текст довгий, показав перші 3500 символів.",
@@ -209,6 +231,22 @@ TEXTS = {
         "word_to_pdf_done": "✅ Готово. Word конвертирован в PDF.",
         "pdf_compressed": "✅ Готово. PDF сжат.",
         "pdf_split": "✅ Готово. Разделил PDF на страниц: {count}.",
+        "merge_start": (
+            "🔗 <b>Объединить PDF</b>\n\n"
+            "Отправь PDF-файлы по очереди.\n"
+            "Когда все файлы добавлены, нажми ✅ Объединить сейчас."
+        ),
+        "merge_started_with_current": (
+            "✅ Добавил текущий PDF как файл #1.\n"
+            "Отправь ещё PDF или нажми ✅ Объединить сейчас."
+        ),
+        "merge_added": (
+            "✅ Добавил PDF #{count}: {filename}\n\n"
+            "Отправь ещё один PDF или нажми ✅ Объединить сейчас."
+        ),
+        "merge_need_two": "Для объединения нужно минимум 2 PDF-файла.",
+        "merge_done": "✅ Готово. Объединил PDF-файлов: {count}.",
+        "merge_failed": "Не получилось объединить PDF.\nПричина: {reason}",
         "first_pages_sent": "Первые 10 страниц отправил. Остальные лежат на сервере.",
         "text_not_found": "Текст не найден. Возможно, это скан. Тут нужен OCR.",
         "text_long": "Текст длинный, показал первые 3500 символов.",
@@ -289,6 +327,22 @@ TEXTS = {
         "word_to_pdf_done": "✅ Done. Word has been converted to PDF.",
         "pdf_compressed": "✅ Done. PDF compressed.",
         "pdf_split": "✅ Done. Split PDF into pages: {count}.",
+        "merge_start": (
+            "🔗 <b>Merge PDFs</b>\n\n"
+            "Send PDF files one by one.\n"
+            "When all files are added, press ✅ Merge now."
+        ),
+        "merge_started_with_current": (
+            "✅ Added the current PDF as file #1.\n"
+            "Send another PDF or press ✅ Merge now."
+        ),
+        "merge_added": (
+            "✅ Added PDF #{count}: {filename}\n\n"
+            "Send another PDF or press ✅ Merge now."
+        ),
+        "merge_need_two": "At least 2 PDF files are required to merge.",
+        "merge_done": "✅ Done. Merged PDF files: {count}.",
+        "merge_failed": "Could not merge PDFs.\nReason: {reason}",
         "first_pages_sent": "I sent the first 10 pages. The rest are stored on the server.",
         "text_not_found": "Text was not found. This may be a scan. OCR is needed here.",
         "text_long": "The text is long, I showed the first 3500 characters.",

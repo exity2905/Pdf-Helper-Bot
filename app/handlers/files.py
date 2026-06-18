@@ -1,5 +1,6 @@
 from html import escape
 from pathlib import Path
+import shutil
 
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, FSInputFile, Message
@@ -7,13 +8,14 @@ from aiogram.types import CallbackQuery, FSInputFile, Message
 from app.i18n import BUTTON_KEY_BY_LABEL, button, button_key, t
 from app.keyboards import (
     main_menu_keyboard,
+    merge_menu_keyboard,
     pdf_actions_keyboard,
     scan_menu_keyboard,
     tools_menu_keyboard,
 )
 from app.services.converters import ConversionError, pdf_to_word, word_to_pdf
 from app.services.image_scan import make_scan_pdf
-from app.services.pdf_tools import compress_pdf, extract_pdf_text, split_pdf
+from app.services.pdf_tools import compress_pdf, extract_pdf_text, merge_pdfs, split_pdf
 from app.services.preferences import get_user_lang
 from app.services.storage import get_user_dir, last_pdf_path, save_telegram_file
 
@@ -23,6 +25,7 @@ IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 WORD_SUFFIXES = {".doc", ".docx"}
 USER_MODES: dict[int, str] = {}
 USER_PDF_ACTIONS: dict[int, str] = {}
+USER_MERGE_FILES: dict[int, list[Path]] = {}
 
 MENU_KEYS = {
     "scan",
@@ -32,6 +35,8 @@ MENU_KEYS = {
     "tools",
     "compress_pdf",
     "split_pdf",
+    "merge_pdf",
+    "merge_now",
     "extract_text",
     "pdf_to_word",
     "word_to_pdf",
@@ -47,6 +52,7 @@ MENU_TEXTS = {
 TOOL_KEYS = {
     "compress_pdf",
     "split_pdf",
+    "merge_pdf",
     "extract_text",
     "pdf_to_word",
     "word_to_pdf",
@@ -69,6 +75,7 @@ async def handle_main_menu(message: Message) -> None:
     if key == "scan":
         USER_MODES.pop(user_id, None)
         USER_PDF_ACTIONS.pop(user_id, None)
+        USER_MERGE_FILES.pop(user_id, None)
         await message.answer(
             t(lang, "scan_menu"),
             reply_markup=scan_menu_keyboard(lang),
@@ -79,6 +86,7 @@ async def handle_main_menu(message: Message) -> None:
     if key == "scan_document":
         USER_MODES[user_id] = "document"
         USER_PDF_ACTIONS.pop(user_id, None)
+        USER_MERGE_FILES.pop(user_id, None)
         await message.answer(
             t(lang, "scan_document"),
             reply_markup=scan_menu_keyboard(lang),
@@ -89,6 +97,7 @@ async def handle_main_menu(message: Message) -> None:
     if key == "id_document":
         USER_MODES[user_id] = "identity"
         USER_PDF_ACTIONS.pop(user_id, None)
+        USER_MERGE_FILES.pop(user_id, None)
         await message.answer(
             t(lang, "id_document"),
             reply_markup=scan_menu_keyboard(lang),
@@ -99,6 +108,7 @@ async def handle_main_menu(message: Message) -> None:
     if key == "photo_to_pdf":
         USER_MODES[user_id] = "photo_pdf"
         USER_PDF_ACTIONS.pop(user_id, None)
+        USER_MERGE_FILES.pop(user_id, None)
         await message.answer(
             t(lang, "photo_to_pdf"),
             reply_markup=scan_menu_keyboard(lang),
@@ -109,6 +119,7 @@ async def handle_main_menu(message: Message) -> None:
     if key == "tools":
         USER_MODES[user_id] = "pdf"
         USER_PDF_ACTIONS.pop(user_id, None)
+        USER_MERGE_FILES.pop(user_id, None)
         await message.answer(
             t(lang, "tools_menu"),
             reply_markup=tools_menu_keyboard(lang),
@@ -116,9 +127,23 @@ async def handle_main_menu(message: Message) -> None:
         )
         return
 
+    if key == "merge_now":
+        await _finish_merge(message, lang)
+        return
+
     if key in TOOL_KEYS:
         USER_MODES[user_id] = "pdf"
         USER_PDF_ACTIONS[user_id] = _tool_action_from_button_key(key)
+        if key == "merge_pdf":
+            USER_MERGE_FILES[user_id] = []
+            await message.answer(
+                t(lang, "merge_start"),
+                reply_markup=merge_menu_keyboard(lang),
+                parse_mode="HTML",
+            )
+            return
+
+        USER_MERGE_FILES.pop(user_id, None)
         file_hint = t(lang, "word_file_hint") if key == "word_to_pdf" else t(lang, "pdf_file_hint")
         await message.answer(
             t(
@@ -139,6 +164,7 @@ async def handle_main_menu(message: Message) -> None:
     if key == "back":
         USER_MODES.pop(user_id, None)
         USER_PDF_ACTIONS.pop(user_id, None)
+        USER_MERGE_FILES.pop(user_id, None)
         await message.answer(
             t(lang, "main_menu"),
             reply_markup=main_menu_keyboard(lang),
@@ -148,6 +174,7 @@ async def handle_main_menu(message: Message) -> None:
 
     USER_MODES.pop(user_id, None)
     USER_PDF_ACTIONS.pop(user_id, None)
+    USER_MERGE_FILES.pop(user_id, None)
     await message.answer(
         t(lang, "main_menu"),
         reply_markup=main_menu_keyboard(lang),
@@ -241,10 +268,31 @@ async def handle_document(message: Message) -> None:
         )
         return
 
+    action = USER_PDF_ACTIONS.get(user_id)
+    if action == "merge":
+        merge_files = USER_MERGE_FILES.setdefault(user_id, [])
+        user_dir = get_user_dir(user_id)
+        merge_dir = user_dir / "merge"
+        input_path = merge_dir / f"merge_{len(merge_files) + 1:03}_{document.file_unique_id}.pdf"
+
+        await save_telegram_file(message.bot, document.file_id, input_path)
+        merge_files.append(input_path)
+
+        await message.answer(
+            t(
+                lang,
+                "merge_added",
+                count=len(merge_files),
+                filename=escape(document.file_name),
+            ),
+            reply_markup=merge_menu_keyboard(lang),
+            parse_mode="HTML",
+        )
+        return
+
     saved_path = last_pdf_path(user_id)
     await save_telegram_file(message.bot, document.file_id, saved_path)
 
-    action = USER_PDF_ACTIONS.get(user_id)
     if action:
         await _run_pdf_action(message, action, saved_path, lang)
         return
@@ -271,6 +319,8 @@ def _tool_action_from_button_key(key: str | None) -> str:
         return "compress"
     if key == "split_pdf":
         return "split"
+    if key == "merge_pdf":
+        return "merge"
     if key == "extract_text":
         return "text"
     if key == "pdf_to_word":
@@ -299,6 +349,37 @@ async def _run_word_to_pdf(message: Message, input_path: Path, output_path: Path
     )
 
 
+async def _finish_merge(message: Message, lang: str) -> None:
+    user_id = message.from_user.id
+    merge_files = USER_MERGE_FILES.get(user_id, [])
+
+    if len(merge_files) < 2:
+        await message.answer(
+            t(lang, "merge_need_two"),
+            reply_markup=merge_menu_keyboard(lang),
+        )
+        return
+
+    output_path = get_user_dir(user_id) / "merged.pdf"
+    try:
+        merge_pdfs(merge_files, output_path)
+    except Exception as exc:
+        await message.answer(
+            t(lang, "merge_failed", reason=str(exc)[:700]),
+            reply_markup=merge_menu_keyboard(lang),
+        )
+        return
+
+    USER_PDF_ACTIONS.pop(user_id, None)
+    USER_MERGE_FILES.pop(user_id, None)
+
+    await message.answer_document(
+        FSInputFile(output_path),
+        caption=t(lang, "merge_done", count=len(merge_files)),
+        reply_markup=tools_menu_keyboard(lang),
+    )
+
+
 async def _run_pdf_action(message: Message, action: str, input_path: Path, lang: str) -> None:
     if action == "compress":
         output_path = input_path.with_name("compressed.pdf")
@@ -321,6 +402,14 @@ async def _run_pdf_action(message: Message, action: str, input_path: Path, lang:
             await message.answer_document(FSInputFile(page))
         if len(pages) > 10:
             await message.answer(t(lang, "first_pages_sent"))
+        return
+
+    if action == "merge":
+        await message.answer(
+            t(lang, "merge_start"),
+            reply_markup=merge_menu_keyboard(lang),
+            parse_mode="HTML",
+        )
         return
 
     if action == "text":
@@ -417,6 +506,32 @@ async def on_split_pdf(callback: CallbackQuery) -> None:
     if len(pages) > 10:
         await callback.message.answer(t(lang, "first_pages_sent"))
 
+    await callback.answer()
+
+
+@router.callback_query(F.data == "pdf:merge_start")
+async def on_merge_pdf_start(callback: CallbackQuery) -> None:
+    user_id = callback.from_user.id
+    lang = get_user_lang(user_id)
+    input_path = last_pdf_path(user_id)
+
+    if not input_path.exists():
+        await callback.answer(t(lang, "send_pdf_first"), show_alert=True)
+        return
+
+    merge_dir = get_user_dir(user_id) / "merge"
+    merge_dir.mkdir(parents=True, exist_ok=True)
+    first_path = merge_dir / "merge_001_current.pdf"
+    shutil.copy2(input_path, first_path)
+
+    USER_MODES[user_id] = "pdf"
+    USER_PDF_ACTIONS[user_id] = "merge"
+    USER_MERGE_FILES[user_id] = [first_path]
+
+    await callback.message.answer(
+        t(lang, "merge_started_with_current"),
+        reply_markup=merge_menu_keyboard(lang),
+    )
     await callback.answer()
 
 

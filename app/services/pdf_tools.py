@@ -34,6 +34,21 @@ def split_pdf(input_path: Path, output_dir: Path) -> list[Path]:
     return pages
 
 
+def merge_pdfs(input_paths: list[Path], output_path: Path) -> Path:
+    writer = PdfWriter()
+
+    for input_path in input_paths:
+        reader = PdfReader(str(input_path))
+        for page in reader.pages:
+            writer.add_page(page)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("wb") as output_file:
+        writer.write(output_file)
+
+    return output_path
+
+
 def extract_pdf_text(input_path: Path) -> str:
     reader = PdfReader(str(input_path))
     chunks = []
